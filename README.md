@@ -1,73 +1,200 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Casl Policies
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A package to manage and enforce policies in a NestJS application using CASL
 
 ## Installation
 
-```bash
-$ yarn install
+To install the package, use the following command:
+
+```
+npm install casl-policies
 ```
 
-## Running the app
+## Setup
 
-```bash
-# development
-$ yarn run start
+#### Step 1: Define Action and Subject Types
 
-# watch mode
-$ yarn run start:dev
+Define your `Action` and `Subject` types. If not defined, default ones will be used.
 
-# production mode
-$ yarn run start:prod
+```js
+export type Action = 'create' | 'read' | 'update' | 'delete' | 'manage';
+export type Subject = 'Policy' | 'Account' | 'UserGroup' | 'all';
 ```
 
-## Test
+#### Step 2: Importing Necessary Classes from casl-policies package
 
-```bash
-# unit tests
-$ yarn run test
+Import the necessary classes such as `Guard`, and `CaslModule` from casl-policies package.
 
-# e2e tests
-$ yarn run test:e2e
+```js
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { CaslModule, PoliciesGuard, DynamicModelFetcher } from 'casl-policies';
 
-# test coverage
-$ yarn run test:cov
+// Define your action and subject types
+type MyAction = 'create' | 'read' | 'update' | 'delete';
+type MySubject = 'User' | 'Post';
+
+@Module({
+  imports: [
+    CaslModule.forRoot<MyAction, MySubject>(),
+  ],
+  providers: [
+    DynamicModelFetcher,
+    {
+      provide: 'POLICIES_GUARD',
+      useClass: PoliciesGuard<MyAction, MySubject>,
+    },
+  ],
+})
+export class AppModule {}
 ```
 
-## Support
+#### Step 3: Custom Decorator
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Define a custom decorator that will call `CheckPolicies<A, S>`, imported from `casl-policies`.
 
-## Stay in touch
+```js
+// custom-check-policies.decorator.ts
+import { SetMetadata } from '@nestjs/common';
+import { RequiredPolicy, CheckPolicies } from 'casl-policies';
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+export const CustomCheckPolicies = (...policies: RequiredPolicy<MyAction, MySubject>[]) => {
+  return CheckPolicies<MyAction, MySubject>(...policies);
+};
+```
+
+#### Step 4: Using the Decorator in Controller
+
+```js
+// my.controller.ts
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { CustomCheckPolicies } from './custom-check-policies.decorator';
+
+@Controller('my-controller')
+export class MyController {
+  @CustomCheckPolicies<MyAction, MySubject>({ action: 'read', subject: 'User', conditions: {} })
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return `This action returns a user with id ${id}`;
+  }
+
+  @CustomCheckPolicies<MyAction, MySubject>({ action: 'write', subject: 'User', conditions: {} })
+  @Post()
+  create(@Body() createDto: any) {
+    return 'This action adds a new user';
+  }
+}
+```
+
+#### Step5: Put into practices with Example Policy
+
+```js
+[
+  {
+    "version": "2012-10-17",
+    "statements": [
+      {
+        "effect": "Allow",
+        "actions": ["read"],
+        "resources": ["Account"],
+        "fields": [],
+        "conditions": {
+          "title": {
+            "$nin": ["CEO", "CTO"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "2012-10-17",
+    "statements": [
+      {
+        "effect": "Allow",
+        "actions": [update", "delete"],
+        "resources": ["Account"],
+        "fields": [],
+        "conditions": {
+          "_id": "{{_id}}"
+        }
+      }
+    ]
+  },
+  {
+    "version": "2012-10-17",
+    "statements": [
+      {
+        "effect": "Deny",
+        "actions": ["update", "delete"],
+        "resources": ["Policy"],
+        "fields": ["version"],
+        "conditions": {}
+      }
+    ]
+  }
+]
+```
+
+## Explanation
+
+#### Building Ability in CaslFactory
+
+The `CaslAbilityFactory` class is responsible for defining user abilities based on policies. It processes policies, replaces placeholders in conditions with user data, and builds abilities using `AbilityBuilder`. Allow rules are pushed to the end of the rules array, while deny rules are unshifted to the beginning, ensuring deny rules are applied first.
+
+#### How PoliciesGuard Works
+
+The `PoliciesGuard` class checks if the current request can proceed based on defined policies. It retrieves policies defined for the route handler and class using `Reflector`, then defines abilities based on the user's policies using CaslAbilityFactory. It validates fields in the request body against updatable fields defined in the policies, fetches entities dynamically if an ID is present in the request parameters, and checks if all policies are satisfied using the can method of the ability object.
+
+```js
+/**
+   * Main method that determines if the current request can proceed based on defined policies.
+   * @param context - The execution context, containing the request and response objects.
+   * @returns A boolean indicating whether the request is allowed.
+   */
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Retrieve policies defined for the route handler and class
+    const policies =
+      this.reflector.getAllAndOverride<RequiredPolicy<A, S>[]>(
+        CHECK_POLICIES_KEY,
+        [context.getHandler(), context.getClass()],
+      ) || [];
+    if (isEmpty(policies)) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest();
+    const account = request.user;
+    // Define the abilities based on the user's policies
+    const ability = await this.caslAbilityFactory.defineAbility(
+      account.policies,
+      account,
+    );
+
+    const conditionContext: Record<string, any> = {};
+
+    for (const policy of policies) {
+      const subject: string = policy.subject as string;
+
+      // Validate fields in the request body against updatable fields defined in the policies
+      if (request.body) {
+        this.checkUpdatableFields(policy, ability, request);
+      }
+
+      // Fetch entity dynamically if ID is present in the request parameters
+      if (request.params[`${subject.toLowerCase()}Id`]) {
+        await this.fetchEntityIfNeeded(subject, request, conditionContext);
+      }
+    }
+
+    // Check if all policies are satisfied
+    return this.checkPolicies(policies, ability, conditionContext);
+  }
+```
+
+## Conclusion
+
+The `casl-policies` package provides a robust framework for managing and enforcing policies in a NestJS application using CASL. By defining your `Action` and `Subject` types, importing necessary classes from the `casl-policies` package, and setting up the `CaslModule` and `PoliciesGuard`, you can easily implement fine-grained access control in your application. Custom decorators such as `CheckPolicies` allow you to enforce these policies at the controller level, ensuring that only authorized actions are permitted based on the defined rules.
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
