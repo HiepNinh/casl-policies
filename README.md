@@ -1,13 +1,13 @@
 # Casl Policies
 
-A package to manage and enforce policies in a NestJS application using CASL
+A package to manage and enforce policies in a NestJS application using CASL. This package extends the functionality of the CASL package to provide fine-grained permission checking in a NestJS application. It enhances policy definitions to resemble Amazon policies, making it highly customizable and easy to define resource limitations, their properties, and constraints on condition fields using MongoQuery. Furthermore, it supports a pattern `{{field}}` that gets replaced by the authenticated user's property values, making the policy guard more robust and flexible.
 
 ## Installation
 
 To install the package, use the following command:
 
 ```
-npm install casl-policies
+npm install casl-policies @casl/ability lodash
 ```
 
 ## Setup
@@ -55,11 +55,11 @@ Define a custom decorator that will call `CheckPolicies<A, S>`, imported from `c
 
 ```js
 // custom-check-policies.decorator.ts
-import { SetMetadata } from '@nestjs/common';
-import { RequiredPolicy, CheckPolicies } from 'casl-policies';
+import { CheckPolicies, RequiredPolicy } from 'casl-policies';
+import { applyDecorators } from '@nestjs/common';
 
-export const CustomCheckPolicies = (...policies: RequiredPolicy<MyAction, MySubject>[]) => {
-  return CheckPolicies<MyAction, MySubject>(...policies);
+export const AppCheckPolicies = (...policies: RequiredPolicy<MyAction, MySubject>[]) => {
+  return applyDecorators(CheckPolicies<MyAction, MySubject>(...policies));
 };
 ```
 

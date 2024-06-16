@@ -20,7 +20,6 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { SerializationInterceptor } from '@interceptors';
 import { LocalStrategy, JwtStrategy } from '@strategies';
 import { JwtAuthGuard, PoliciesGuard } from '@guards';
-import { DynamicModelFetcher } from '@utils';
 
 @Module({
   imports: [
@@ -95,7 +94,6 @@ import { DynamicModelFetcher } from '@utils';
     AppService,
     LocalStrategy,
     JwtStrategy,
-    DynamicModelFetcher,
     {
       provide: APP_INTERCEPTOR,
       useClass: SerializationInterceptor,
