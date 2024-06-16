@@ -20,7 +20,6 @@ export class PoliciesService {
   ) {}
 
   async createPolicy(policy: PolicyDto.Create) {
-    console.log(policy);
     return await this.policyModel.create(policy);
   }
 

@@ -13,7 +13,10 @@ export class AccountsController {
     return await this.accountService.register(accountData);
   }
 
-  @CheckPolicies({ action: 'delete', subject: 'Account' })
+  @CheckPolicies(
+    { action: 'read', subject: 'Account' },
+    { action: 'delete', subject: 'Account' },
+  )
   @Get(':accountId')
   async getById(@Param('accountId') id: string) {
     return await this.accountService.getById(id);

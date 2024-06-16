@@ -52,7 +52,7 @@ export class AccountsService {
 
     // Fetch related AccountUserGroups to get userGroupIds
     const userGroups = await this.accountUserGroupModel
-      .find({ accountId: account._id })
+      .find({ accountId: account._id.toString() })
       .select('userGroupId')
       .exec();
     const userGroupIds = userGroups.map((ug) => ug.userGroupId.toString());

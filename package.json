@@ -1,6 +1,6 @@
 {
   "name": "casl-policies",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A package to manage and enforce policies in a NestJS application using CASL",
   "author": "briankim",
   "private": false,
