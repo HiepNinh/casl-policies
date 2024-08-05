@@ -4,3 +4,6 @@ jest.config.js
 tsconfig.json
 jest-e2e.json
 .npmignore
+.git
+.vscode
+.env

@@ -1,4 +1,21 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    "src/main.ts",
+    "src/app*.ts",
+    "src/configs/**/*",
+    "src/constants/**/*",
+    "src/decorators/**/*",
+    "src/dtos/**/*",
+    "src/entities/**/*",
+    "src/guards/**/*",
+    "src/interceptors/**/*",
+    "src/modules/**/*",
+    "src/strategies/**/*",
+    "src/utils/**/*",
+  ]
 }

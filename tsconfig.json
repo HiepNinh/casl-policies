@@ -16,6 +16,68 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@configs/*": [
+        "src/configs/*"
+      ],
+      "@configs": [
+        "src/configs"
+      ],
+      "@constants/*": [
+        "src/constants/*"
+      ],
+      "@constants": [
+        "src/constants"
+      ],
+      "@decorators/*": [
+        "src/decorators/*"
+      ],
+      "@decorators": [
+        "src/decorators"
+      ],
+      "@dtos/*": [
+        "src/dtos/*"
+      ],
+      "@dtos": [
+        "src/dtos"
+      ],
+      "@entities/*": [
+        "src/entities/*"
+      ],
+      "@entities": [
+        "src/entities"
+      ],
+      "@guards/*": [
+        "src/guards/*"
+      ],
+      "@guards": [
+        "src/guards"
+      ],
+      "@interceptors/*": [
+        "src/interceptors/*"
+      ],
+      "@interceptors": [
+        "src/interceptors"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@modules": [
+        "src/modules"
+      ],
+      "@strategies/*": [
+        "src/strategies/*"
+      ],
+      "@strategies": [
+        "src/strategies"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@utils": [
+        "src/utils"
+      ],
+    }
   }
 }
